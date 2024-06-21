@@ -1,0 +1,76 @@
+{% extends "layout.html" %} {% block title %}search food{% endblock %} {% block
+main %}
+<div class="container wrap-box-shadow-600 mb-5">
+	<form class="form-search-food w-100 mx-auto" action="/search_food" method="post">
+		<h1 class="h3 mb-3 fw-normal text-center">Free search</h1>
+		<div class="form-floating w-75 mx-auto">
+			<input type="text" class="form-control" id="floating_food" name="food" {% if food %} value="{{ food }}" {%
+				endif %} />
+			<label for="floating_food">Food</label>
+		</div>
+		<div class="form-floating mt-1 w-75 mx-auto">
+			<input type="text" class="form-control" id="floating_brand" name="brand" {% if brand %} value="{{ brand }}"
+				{% endif %} />
+			<label for="floating_brand">Brand (optional)</label>
+		</div>
+		<div class="form-check form-check-inline mt-3 mb-2">
+			<input class="form-check-input" type="radio" name="inline_radio" id="inline_radio_all"
+				value="inline_radio_all" onchange="on_radio_change('yes_brand')" checked />
+			<label class="form-check-label" for="inline_radio_all">Any result</label>
+		</div>
+		<div class="form-check form-check-inline">
+			<input class="form-check-input" type="radio" name="inline_radio" id="inline_radio_generic"
+				value="inline_radio_generic" onchange="on_radio_change('no_brand')" />
+			<label class="form-check-label" for="inline_radio_generic">Generic food</label>
+		</div>
+		<div class="form-check form-check-inline">
+			<input class="form-check-input" type="radio" name="inline_radio" id="inline_radio_branded"
+				value="inline_radio_branded" onchange="on_radio_change('yes_brand')" />
+			<label class="form-check-label" for="inline_radio_branded">Branded food</label>
+		</div>
+		<input type="hidden" id="remember_radio" value="{{ radio_to_check }}" />
+		<div class="text-center">
+			<button class="btn btn-primary w-50 mt-2 py-2" type="submit">
+				Search
+			</button>
+		</div>
+	</form>
+</div>
+
+{% if query_result is defined %}
+<div class="container wrap-box-shadow">
+	<div class="row text-center justify-content-center mb-3">
+		{% for table in query_result %}
+		<div class="col-xl-4 col-lg-6 col-md-12">
+			<div class="card card-search-food mb-4 rounded-3 shadow-sm">
+				<div class="card-header card-header-search-food">
+					<h4 class="my-0 fw-normal">
+						<b>{% if table.brand %}{{table.brand}}: {% endif %}</b>{{ table.name
+						}}
+					</h4>
+				</div>
+				<div class="card-body card-body-search-food">
+					<h1 class="card-title">{{ table.serving_description }}:</h1>
+					<ul class="list-unstyled mt-3 mb-4 big-info">
+						<li>Calories: {{ table.calories }}Kcal</li>
+						<li>
+							Carbs: {{ table.carbohydrate }}g{%if table.sugar != "N/A" %} ({{ table.sugar }}g of sugar){% endif %}
+						</li>
+						<li>Protein: {{ table.protein }}g</li>
+						<li>Total fat: {{ table.fat }}g</li>
+					</ul>
+					<form action="/nutrition_facts?food_id={{ table['food_id'] }}" method="post">
+						<button class="btn btn-lg btn-info w-75 btn-search-food" type="submit">
+							View details
+						</button>
+					</form>
+				</div>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+</div>
+{% endif %}
+
+<script src="/static/search_food.js"></script>
+{% endblock %}

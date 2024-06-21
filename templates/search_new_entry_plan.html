@@ -1,0 +1,79 @@
+{% extends "layout.html" %} {% block title %}search food{% endblock %} {% block
+main %}
+
+<div class="container wrap-box-shadow-600 mb-5">
+	<form class="form-search-food w-100 mx-auto" action="/search_new_entry_plan?plan_id={{ plan_id }}&meal={{ meal }}"
+		method="post">
+		<h1 class="h3 mb-3 fw-normal text-center">
+			Search new entry for {{ meal }}
+		</h1>
+		<div class="input-group mb-3">
+			<button class="btn btn-primary" name="add_entry_plan_button" value="add_entry_plan_button" type="submit">
+				Search
+			</button>
+			<input type="text" name="add_entry_plan_input" class="form-control" placeholder="taco" {% if food %}
+				value="{{ food }}" {% endif %} />
+		</div>
+		<div class="text-center">
+			<div class="form-check form-check-inline">
+				<input class="form-check-input" type="radio" name="inline_radio" id="inline_radio_food"
+					value="inline_radio_food" checked />
+				<label class="form-check-label" for="inline_radio_food">Generic food</label>
+			</div>
+			<div class="form-check form-check-inline mt-3 mb-2">
+				<input class="form-check-input" type="radio" name="inline_radio" id="inline_radio_recipe"
+					value="inline_radio_recipe" />
+				<label class="form-check-label" for="inline_radio_recipe">My recipes</label>
+			</div>
+		</div>
+		<input type="hidden" id="remember_radio" value="{{ radio_to_check }}" />
+	</form>
+</div>
+
+{% if results != "" %}
+<div class="divider"></div>
+
+<div class="container mt-4">
+	<h2>Your query produced the following results:</h2>
+	{% for food in results %}
+	<div class="container wrap-box-shadow my-4">
+		{% set onclick_id_add = food.food_id %} {% if radio_to_check == 2 %} {% set
+		url_request = "simple_food=False" %} {% else %} {% set url_request =
+		"simple_food=True" %} {% endif %}
+		<form
+			action="/update_plan?plan_id={{ plan_id }}&meal={{ meal }}&new_entry_id={{ food['food_id'] }}&{{ url_request }}"
+			method="post" id="add_food_{{ onclick_id_add }}">
+			<div class="row">
+				<div class="col-8 thin-right">
+					<div class="row big-info">
+						<a {% if radio_to_check==2 %} href="/view_recipe?recipe_id={{ food.food_id }}" {% else %}
+							href="/nutrition_facts?food_id={{ food.food_id }}" {% endif %} target="_blank"
+							rel="noopener noreferrer">
+							{% if food.brand != "" %}
+							<b>{{ food.brand }}: </b>{{ food.name }} {% else %} {{ food.name
+							}} {% endif %}
+						</a>
+					</div>
+					<div class="row">
+						Per {{ food.serving_description }}: calories {{ food.calories
+						}}Kcal, carbs {{food.carbohydrate }}g{% if food.sugar != "N/A"
+						%} ({{ food.sugar }}g sugar){% endif %}, protein {{ food.protein
+						}}g, fat {{ food.fat }}g
+					</div>
+				</div>
+				<div class="col-4 my-auto text-center">
+					<input type="hidden" name="add_new_entry" value="add_new_entry" />
+					<a href="#" onclick='document.getElementById("add_food_{{ onclick_id_add }}").submit();'>Amount of
+						"{{ food.measurement_description }}" to add:
+					</a>
+					<input type="text" autocomplete="off" name="new_ingredient_amount" placeholder="1" size="3" />
+				</div>
+			</div>
+		</form>
+	</div>
+	{% endfor %}
+</div>
+{% endif %}
+
+<script src="/static/search_new_entry_plan.js"></script>
+{% endblock %}

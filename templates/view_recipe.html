@@ -1,0 +1,165 @@
+{% extends "layout.html" %} {% block title %}view recipe{% endblock %} {% block
+main %}
+<div class="container wrap-box-shadow">
+	<div class="container mb-5 text-center">
+		<h1 class="display-5 fw-bold text-body-emphasis lh-1">
+			Recipe: {{ recipe_name }}
+		</h1>
+	</div>
+
+	<div class="container my-4">
+		<div class="row justify-content-between">
+			<div class="col-auto">
+				<form action="/update_recipe?recipe_id={{ recipe_id }}" method="post" id="update_recipe_generalities">
+					<label for="view-recipes-name">Name and total servings:</label>
+					<div class="input-group mb-3">
+						<button class="btn btn-primary" type="submit" name="update_recipe_generalities">
+							<i class="fa-solid fa-check"></i>
+						</button>
+						<input type="text" autocomplete="off" name="recipe_name" id="view-recipes-name"
+							class="form-control" placeholder="Rename your recipe" value="{{ recipe_name }}" />
+						<input type="number" min="1" id="view-recipe-total-servings" autocomplete="off"
+							name="recipe_total_servings" class="form-control"
+							placeholder="Redefine how many services this recipe is made of"
+							value="{{ recipe_total_servings }}" />
+					</div>
+				</form>
+			</div>
+			<div class="col-auto">
+				<form action="/view_recipe?recipe_id={{ recipe_id }}" method="post" id="search_recipe">
+					<label for="new_ingredient">Search a new ingredient:&#160;</label>
+					<div class="input-group mb-3">
+						<button class="btn btn-primary" type="submit">
+							<i class="fa-solid fa-search"></i>
+						</button>
+						<input type="text" autocomplete="off" name="new_ingredient_query" id="new_ingredient"
+							class="form-control" placeholder="Milk" value="{{ new_ingredient }}" />
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="container my-4">
+		<table class="table" id="table-breakfast">
+			<thead class="table-primary">
+				<tr>
+					<th class="text-center width-5 text-capitalize"></th>
+					<th class="text-start width-30 text-capitalize">Ingredient</th>
+					<th class="text-center width-25 text-capitalize">Amount</th>
+					<th class="text-center width-10 text-capitalize">Carbs</th>
+					<th class="text-center width-10 text-capitalize">Protein</th>
+					<th class="text-center width-10 text-capitalize">Fat</th>
+					<th class="text-center width-10 text-capitalize">Calories</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for ingredient in recipe.ingredients %}
+				<tr class="align-middle">
+					<td class="text-cente">
+						<form
+							action="/update_recipe?recipe_id={{ recipe_id }}&meal=breakfast&simple_food={{ ingredient.simple_food }}"
+							method="post">
+							<button class="btn btn-danger" name="remove_ingredient" value="{{ ingredient.food_id }}"
+								type="submit" onclick="return confirm('Are you sure you want to delete this entry?');">
+								<i class="fa-solid fa-trash-can"></i>
+							</button>
+						</form>
+					</td>
+					<td class="text-start">
+						<a href="/nutrition_facts?food_id={{ ingredient.food_id }}" target="_blank"
+							rel="noopener noreferrer">
+							{% if ingredient.brand != "" %}{{ ingredient.brand }}: {% endif
+							%}{{ ingredient.name }}
+						</a>
+					</td>
+					<td>
+						<div class="row">
+							<div class="col-auto mx-auto">
+								{{ ingredient.number_of_units }} {{
+								ingredient.measurement_description }}(s)
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-auto mx-auto">
+								<form action="/update_recipe?recipe_id={{ recipe_id }}" method="post">
+									<div class="btn-group">
+										<button class="btn btn-success" type="submit" name="increase_amount"
+											value="{{ ingredient.food_id }}"><i class="fa-solid fa-plus"></i>
+										</button>
+										<button class="btn btn-danger" type="submit" name="decrease_amount"
+											value="{{ ingredient.food_id }}"><i class="fa-solid fa-minus"></i>
+										</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</td>
+					<td class="text-center">{{ ingredient.carbohydrate }} g</td>
+					<td class="text-center">{{ ingredient.protein }} g</td>
+					<td class="text-center">{{ ingredient.fat }} g</td>
+					<td class="text-center">{{ ingredient.calories }} Kcal</td>
+				</tr>
+				{% endfor %}
+				<tr>
+					<td class="text-start fw-bold" colspan="3">Total</td>
+					<td class="text-center fw-bold" id="carbohydrate_value">
+						{{ recipe.tot_carbohydrate }} g
+					</td>
+					<td class="text-center fw-bold" id="protein_value">
+						{{ recipe.tot_protein }} g
+					</td>
+					<td class="text-center fw-bold" id="fat_value">
+						{{ recipe.tot_fat }} g
+					</td>
+					<td class="text-center fw-bold">{{ recipe.tot_calories }} Kcal</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	{% if (recipe.ingredients|length > 0) %}
+	<div class="mx-auto chart-doughnut-macro mb-4" id="chart_doughnut_macro"></div>
+	{% endif %} {% if search_results %}
+	<div class="divider"></div>
+
+	<div class="container mt-4">
+		<h2>Your query produced the following results:</h2>
+		{% endif %} {% for food in search_results %}
+		<div class="container wrap-box-shadow my-4">
+			{% set onclick_id_add = food.food_id %}
+			<form action="/update_recipe?recipe_id={{ recipe_id }}&new_ingredient_id={{ food['food_id'] }}"
+				method="post" id="add_food_{{ onclick_id_add }}">
+				<div class="row">
+					<div class="col-8 thin-right">
+						<div class="row big-info">
+							<a href="/nutrition_facts?food_id={{ food.food_id }}" target="_blank"
+								rel="noopener noreferrer">
+									{% if food.brand != "" %}
+									<b>{{ food.brand }}: </b>{{ food.name }} {% else %} {{
+									food.name }} {% endif %}
+							</a>
+						</div>
+						<div class="row">
+								Per {{ food.serving_description }}: calories {{ food.calories
+								}}Kcal, carbs {{food.carbohydrate }}g{%if food.sugar != "N/A" %} ({{ food.sugar }}g
+								sugar){% endif %},
+								protein {{ food.protein }}g, fat {{ food.fat }}g
+						</div>
+					</div>
+					<div class="col-4 my-auto text-center">
+						<input type="hidden" name="add_new_entry" value="add_new_entry" />
+						<a href="#" onclick='document.getElementById("add_food_{{ onclick_id_add }}").submit();'>Amount
+							of "{{ food.measurement_description }}" to add:
+						</a>
+						<input type="text" autocomplete="off" name="new_ingredient_amount" placeholder="1" size="3" />
+					</div>
+				</div>
+			</form>
+		</div>
+		{% endfor %}
+	</div>
+</div>
+<script src="/static/view_recipe.js"></script>
+
+{% endblock %}

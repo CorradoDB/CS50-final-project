@@ -1,0 +1,633 @@
+{% extends "layout.html" %} {% block title %}view plan{% endblock %} {% block
+main %}
+<div class="container wrap-box-shadow">
+	<div class="container mb-5 text-center">
+		<h1 class="display-5 fw-bold text-body-emphasis lh-1">
+			Plan: {{ plan_name }}
+		</h1>
+	</div>
+
+	<div class="container my-4">
+		<div class="row">
+			<div class="col-auto">
+				<form action="/update_plan?plan_id={{ plan_id }}" method="post" id="update_plan_n">
+					<label for="plan_name">Name:</label>
+					<div class="input-group mb-3">
+						<button class="btn btn-primary" type="submit" name="update_plan_name">
+							<i class="fa-solid fa-check"></i>
+						</button>
+						<input type="text" autocomplete="off" name="plan_name" id="plan_name" class="form-control"
+							placeholder="Rename your plan" value="{{ plan_name }}" />
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="row">
+			<form action="/update_plan?plan_id={{ plan_id }}" method="post" id="update_plan_d">
+				<div class="col-md-6 mt-3">
+					<label for="plan_description">Description:</label>
+					<div class="input-group">
+						<button class="input-group-text btn btn-primary" type="submit" name="update_plan_description">
+							<i class="fa-solid fa-check"></i>
+						</button>
+						<textarea class="form-control" autocomplete="off" name="plan_description" id="plan_description"
+							placeholder="Edit your plan description">{{ plan_description }}</textarea>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div class="container my-4">
+		<table class="table" id="table-breakfast">
+			<thead class="table-primary">
+				<tr>
+					<th class="text-center width-5 text-capitalize"></th>
+					<th class="text-start width-35 text-capitalize">Breakfast</th>
+					<th class="text-center width-20 text-capitalize">Amount</th>
+					<th class="text-center width-10 text-capitalize">Protein</th>
+					<th class="text-center width-10 text-capitalize">Carbs</th>
+					<th class="text-center width-10 text-capitalize">Fats</th>
+					<th class="text-end width-10 text-capitalize">Kcal</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for entry in breakfast.ingredients %}
+				<tr class="align-middle">
+					<td class="text-cente">
+						<form
+							action="/update_plan?plan_id={{ plan_id }}&meal=breakfast&simple_food={{ entry.simple_food }}"
+							method="post">
+							<button class="btn btn-danger" name="remove_food" {% if entry.simple_food==True %}
+								value="{{ entry.food.food_id }}" {% else %} value="{{ entry.id }}" {% endif %}
+								type="submit" onclick="return confirm('Are you sure you want to delete this entry?');"
+								title="Delete this entry">
+								<i class="fa-solid fa-trash-can"></i>
+						</form>
+					</td>
+					{% if entry.simple_food == True %}
+					<td class="text-start">
+						<a href="/nutrition_facts?food_id={{ entry.food.food_id }}" target="_blank"
+							rel="noopener noreferrer">
+							{% if entry.food.brand != "" %} {{ entry.food.brand }} : {% endif
+							%} {{ entry.food.name }}
+						</a>
+					</td>
+					<td>
+						<div class="row">
+							<div class="col-auto mx-auto">
+								{{ entry.food.number_of_units }} {{ entry.food.measurement_description }}(s)
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-auto mx-auto">
+								<form action="/update_plan?plan_id={{ plan_id }}&meal=breakfast&simple_food=True"
+									method="post">
+									<div class="btn-group">
+										<button class="btn btn-success" type="submit" name="increase_amount"
+											value="{{ entry.food.food_id }}"><i class="fa-solid fa-plus"></i>
+										</button>
+										<button class="btn btn-danger" type="submit" name="decrease_amount"
+											value="{{ entry.food.food_id }}"><i class="fa-solid fa-minus"></i>
+										</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</td>
+					<td class="text-center">{{ entry.food.protein }} g</td>
+					<td class="text-center">{{ entry.food.carbohydrate }} g</td>
+					<td class="text-center">{{ entry.food.fat }} g</td>
+					<td class="text-end">{{ entry.food.calories }} Kcal</td>
+					{% else %}
+					<td class="text-start">
+						<a href="/view_recipe?recipe_id={{ entry.id }}" target="_blank" rel="noopener noreferrer">
+							{{entry.name }}
+						</a>
+					</td>
+					<td>
+						<div class="row">
+							<div class="col-auto mx-auto">{{ entry.amount }} serving(s)
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-auto mx-auto">
+								<form action="/update_plan?plan_id={{ plan_id }}&meal=breakfast&simple_food=False"
+									method="post">
+									<div class="btn-group">
+										<button class="btn btn-success" type="submit" name="increase_amount"
+											value="{{ entry.id }}"><i class="fa-solid fa-plus"></i>
+										</button>
+										<button class="btn btn-danger" type="submit" name="decrease_amount"
+											value="{{ entry.id }}"><i class="fa-solid fa-minus"></i>
+										</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</td>
+					<td class="text-center">{{ entry.food.tot_protein }} g</td>
+					<td class="text-center">{{ entry.food.tot_carbohydrate }} g</td>
+					<td class="text-center">{{ entry.food.tot_fat }} g</td>
+					<td class="text-end">{{ entry.food.tot_calories }} Kcal</td>
+					{% endif %}
+				</tr>
+				{% endfor %}
+				<tr>
+					<td class="text-start fw-bold" colspan="3">
+						Total
+					</td>
+					<td class="text-center fw-bold" id="tot_protein_breakfast">{{ breakfast.tot_protein }} g</td>
+					<td class="text-center fw-bold" id="tot_carbohydrate_breakfast">
+						{{ breakfast.tot_carbohydrate }} g
+					</td>
+					<td class="text-center fw-bold" id="tot_fat_breakfast">{{ breakfast.tot_fat }} g</td>
+					<td class="text-end fw-bold" id="tot_calories_breakfast">{{ breakfast.tot_calories }} Kcal</td>
+				</tr>
+				<tr>
+					<td class="plans-newplan-row" colspan="7">
+						<form action="/search_new_entry_plan?plan_id={{ plan_id }}&meal=breakfast" id="add_breakfast"
+							method="post">
+							<a href="#" onclick="document.getElementById('add_breakfast').submit();">Add entry to table
+								breakfast</a>
+						</form>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<table class="table" id="table-lunch">
+			<thead class="table-primary">
+				<tr>
+					<th class="text-center width-5 text-capitalize"></th>
+					<th class="text-start width-35 text-capitalize">Lunch</th>
+					<th class="text-center width-20 text-capitalize">Amount</th>
+					<th class="text-center width-10 text-capitalize">Protein</th>
+					<th class="text-center width-10 text-capitalize">Carbs</th>
+					<th class="text-center width-10 text-capitalize">Fats</th>
+					<th class="text-end width-10 text-capitalize">Kcal</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for entry in lunch.ingredients %}
+				<tr class="align-middle">
+					<td class="text-cente">
+						<form action="/update_plan?plan_id={{ plan_id }}&meal=lunch&simple_food={{ entry.simple_food }}"
+							method="post">
+							<button class="btn btn-danger" name="remove_food" {% if entry.simple_food==True %}
+								value="{{ entry.food.food_id }}" {% else %} value="{{ entry.id }}" {% endif %}
+								type="submit" onclick="return confirm('Are you sure you want to delete this entry?');">
+								<i class="fa-solid fa-trash-can"></i>
+						</form>
+					</td>
+					{% if entry.simple_food == True %}
+					<td class="text-start">
+						<a href="/nutrition_facts?food_id={{ entry.food.food_id }}" target="_blank"
+							rel="noopener noreferrer">
+							{% if entry.food.brand != "" %} {{ entry.food.brand }} : {% endif
+							%} {{ entry.food.name }}
+						</a>
+					</td>
+					<td class="text-center">
+						<div class="row">
+							<div class="col-auto mx-auto">
+								{{ entry.food.number_of_units }} {{ entry.food.measurement_description }}(s)
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-auto mx-auto">
+								<form action="/update_plan?plan_id={{ plan_id }}&meal=lunch&simple_food=True"
+									method="post">
+									<div class="btn-group">
+										<button class="btn btn-success" type="submit" name="increase_amount"
+											value="{{ entry.food.food_id }}"><i class="fa-solid fa-plus"></i>
+										</button>
+										<button class="btn btn-danger" type="submit" name="decrease_amount"
+											value="{{ entry.food.food_id }}"><i class="fa-solid fa-minus"></i>
+										</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</td>
+					<td class="text-center">{{ entry.food.protein }} g</td>
+					<td class="text-center">{{ entry.food.carbohydrate }} g</td>
+					<td class="text-center">{{ entry.food.fat }} g</td>
+					<td class="text-end">{{ entry.food.calories }} Kcal</td>
+					{% else %}
+					<td class="text-start">
+						<a href="/view_recipe?recipe_id={{ entry.id }}" target="_blank" rel="noopener noreferrer">
+							{{entry.name }}
+						</a>
+					</td>
+					<td>
+						<div class="row">
+							<div class="col-auto mx-auto">{{ entry.amount }} serving(s)
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-auto mx-auto">
+								<form action="/update_plan?plan_id={{ plan_id }}&meal=lunch&simple_food=False"
+									method="post">
+									<div class="btn-group">
+										<button class="btn btn-success" type="submit" name="increase_amount"
+											value="{{ entry.id }}"><i class="fa-solid fa-plus"></i>
+										</button>
+										<button class="btn btn-danger" type="submit" name="decrease_amount"
+											value="{{ entry.id }}"><i class="fa-solid fa-minus"></i>
+										</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</td>
+					<td class="text-center">{{ entry.food.tot_protein }} g</td>
+					<td class="text-center">{{ entry.food.tot_carbohydrate }} g</td>
+					<td class="text-center">{{ entry.food.tot_fat }} g</td>
+					<td class="text-end">{{ entry.food.tot_calories }} Kcal</td>
+					{% endif %}
+				</tr>
+				{% endfor %}
+				<tr>
+					<td class="text-start fw-bold" colspan="3">
+						Total
+					</td>
+					<td class="text-center fw-bold" id="tot_protein_lunch">{{ lunch.tot_protein }} g</td>
+					<td class="text-center fw-bold" id="tot_carbohydrate_lunch">{{ lunch.tot_carbohydrate }} g</td>
+					<td class="text-center fw-bold" id="tot_fat_lunch">{{ lunch.tot_fat }} g</td>
+					<td class="text-end fw-bold" id="tot_calories_lunch">{{ lunch.tot_calories }} Kcal</td>
+				</tr>
+				<tr>
+					<td class="plans-newplan-row" colspan="7">
+						<form action="/search_new_entry_plan?plan_id={{ plan_id }}&meal=lunch" id="add_lunch"
+							method="post">
+							<a href="#" onclick="document.getElementById('add_lunch').submit();">Add entry to table
+								lunch</a>
+						</form>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<table class="table" id="table-dinner">
+			<thead class="table-primary">
+				<tr>
+					<th class="text-center width-5 text-capitalize"></th>
+					<th class="text-start width-35 text-capitalize">Dinner</th>
+					<th class="text-center width-20 text-capitalize">Amount</th>
+					<th class="text-center width-10 text-capitalize">Protein</th>
+					<th class="text-center width-10 text-capitalize">Carbs</th>
+					<th class="text-center width-10 text-capitalize">Fats</th>
+					<th class="text-end width-10 text-capitalize">Kcal</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for entry in dinner.ingredients %}
+				<tr class="align-middle">
+					<td class="text-cente">
+						<form
+							action="/update_plan?plan_id={{ plan_id }}&meal=dinner&simple_food={{ entry.simple_food }}"
+							method="post">
+							<button class="btn btn-danger" name="remove_food" {% if entry.simple_food==True %}
+								value="{{ entry.food.food_id }}" {% else %} value="{{ entry.id }}" {% endif %}
+								type="submit" onclick="return confirm('Are you sure you want to delete this entry?');">
+								<i class="fa-solid fa-trash-can"></i>
+						</form>
+					</td>
+					{% if entry.simple_food == True %}
+					<td class="text-start">
+						<a href="/nutrition_facts?food_id={{ entry.food.food_id }}" target="_blank"
+							rel="noopener noreferrer">
+							{% if entry.food.brand != "" %} {{ entry.food.brand }} : {% endif
+							%} {{ entry.food.name }}
+						</a>
+					</td>
+					<td>
+						<div class="row">
+							<div class="col-auto mx-auto">{{ entry.food.number_of_units }} {{
+								entry.food.measurement_description }}(s)
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-auto mx-auto">
+								<form action="/update_plan?plan_id={{ plan_id }}&meal=dinner&simple_food=True"
+									method="post">
+									<div class="btn-group">
+										<button class="btn btn-success" type="submit" name="increase_amount"
+											value="{{ entry.food.food_id }}"><i class="fa-solid fa-plus"></i>
+										</button>
+										<button class="btn btn-danger" type="submit" name="decrease_amount"
+											value="{{ entry.food.food_id }}"><i class="fa-solid fa-minus"></i>
+										</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</td>
+					<td class="text-center">{{ entry.food.protein }} g</td>
+					<td class="text-center">{{ entry.food.carbohydrate }} g</td>
+					<td class="text-center">{{ entry.food.fat }} g</td>
+					<td class="text-end">{{ entry.food.calories }} Kcal</td>
+					{% else %}
+					<td class="text-start">
+						<a href="/view_recipe?recipe_id={{ entry.id }}" target="_blank" rel="noopener noreferrer">
+							{{entry.name }}
+						</a>
+					</td>
+					<td>
+						<div class="row">
+							<div class="col-auto mx-auto">{{ entry.amount }} serving(s)
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-auto mx-auto">
+								<form action="/update_plan?plan_id={{ plan_id }}&meal=dinner&simple_food=False"
+									method="post">
+									<div class="btn-group">
+										<button class="btn btn-success" type="submit" name="increase_amount"
+											value="{{ entry.id }}"><i class="fa-solid fa-plus"></i>
+										</button>
+										<button class="btn btn-danger" type="submit" name="decrease_amount"
+											value="{{ entry.id }}"><i class="fa-solid fa-minus"></i>
+										</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</td>
+					<td class="text-center">{{ entry.food.tot_protein }} g</td>
+					<td class="text-center">{{ entry.food.tot_carbohydrate }} g</td>
+					<td class="text-center">{{ entry.food.tot_fat }} g</td>
+					<td class="text-end">{{ entry.food.tot_calories }} Kcal</td>
+					{% endif %}
+				</tr>
+				{% endfor %}
+				<tr>
+					<td class="text-start fw-bold" colspan="3">
+						Total
+					</td>
+					<td class="text-center fw-bold" id="tot_protein_dinner">{{ dinner.tot_protein }} g</td>
+					<td class="text-center fw-bold" id="tot_carbohydrate_dinner">{{ dinner.tot_carbohydrate }} g</td>
+					<td class="text-center fw-bold" id="tot_fat_dinner">{{ dinner.tot_fat }} g</td>
+					<td class="text-end fw-bold" id="tot_calories_dinner">{{ dinner.tot_calories }} Kcal</td>
+				</tr>
+				<tr>
+					<td class="plans-newplan-row" colspan="7">
+						<form action="/search_new_entry_plan?plan_id={{ plan_id }}&meal=dinner" id="add_dinner"
+							method="post">
+							<a href="#" onclick="document.getElementById('add_dinner').submit();">Add entry to table
+								dinner</a>
+						</form>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<table class="table" id="table-snack">
+			<thead class="table-primary">
+				<tr>
+					<th class="text-center width-5 text-capitalize"></th>
+					<th class="text-start width-35 text-capitalize">Snack</th>
+					<th class="text-center width-20 text-capitalize">Amount</th>
+					<th class="text-center width-10 text-capitalize">Protein</th>
+					<th class="text-center width-10 text-capitalize">Carbs</th>
+					<th class="text-center width-10 text-capitalize">Fats</th>
+					<th class="text-end width-10 text-capitalize">Kcal</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for entry in snack.ingredients %}
+				<tr class="align-middle">
+					<td class="text-cente">
+						<form action="/update_plan?plan_id={{ plan_id }}&meal=snack&simple_food={{ entry.simple_food }}"
+							method="post">
+							<button class="btn btn-danger" name="remove_food" {% if entry.simple_food==True %}
+								value="{{ entry.food.food_id }}" {% else %} value="{{ entry.id }}" {% endif %}
+								type="submit" onclick="return confirm('Are you sure you want to delete this entry?');">
+								<i class="fa-solid fa-trash-can"></i>
+						</form>
+					</td>
+					{% if entry.simple_food == True %}
+					<td class="text-start">
+						<a href="/nutrition_facts?food_id={{ entry.food.food_id }}" target="_blank"
+							rel="noopener noreferrer">
+							{% if entry.food.brand != "" %} {{ entry.food.brand }} : {% endif
+							%} {{ entry.food.name }}
+						</a>
+					</td>
+					<td>
+						<div class="row">
+							<div class="col-auto mx-auto">{{ entry.food.number_of_units }} {{
+								entry.food.measurement_description }}(s)
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-auto mx-auto">
+								<form action="/update_plan?plan_id={{ plan_id }}&meal=snack&simple_food=True"
+									method="post">
+									<div class="btn-group">
+										<button class="btn btn-success" type="submit" name="increase_amount"
+											value="{{ entry.food.food_id }}"><i class="fa-solid fa-plus"></i>
+										</button>
+										<button class="btn btn-danger" type="submit" name="decrease_amount"
+											value="{{ entry.food.food_id }}"><i class="fa-solid fa-minus"></i>
+										</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</td>
+					<td class="text-center">{{ entry.food.protein }} g</td>
+					<td class="text-center">{{ entry.food.carbohydrate }} g</td>
+					<td class="text-center">{{ entry.food.fat }} g</td>
+					<td class="text-end">{{ entry.food.calories }} Kcal</td>
+					{% else %}
+					<td class="text-start">
+						<a href="/view_recipe?recipe_id={{ entry.id }}" target="_blank" rel="noopener noreferrer">
+							{{entry.name }}
+						</a>
+					</td>
+					<td>
+						<div class="row">
+							<div class="col-auto mx-auto">{{ entry.amount }} serving(s)
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-auto mx-auto">
+								<form action="/update_plan?plan_id={{ plan_id }}&meal=snack&simple_food=False"
+									method="post">
+									<div class="btn-group">
+										<button class="btn btn-success" type="submit" name="increase_amount"
+											value="{{ entry.id }}"><i class="fa-solid fa-plus"></i>
+										</button>
+										<button class="btn btn-danger" type="submit" name="decrease_amount"
+											value="{{ entry.id }}"><i class="fa-solid fa-minus"></i>
+										</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</td>
+					<td class="text-center">{{ entry.food.tot_protein }} g</td>
+					<td class="text-center">{{ entry.food.tot_carbohydrate }} g</td>
+					<td class="text-center">{{ entry.food.tot_fat }} g</td>
+					<td class="text-end">{{ entry.food.tot_calories }} Kcal</td>
+					{% endif %}
+				</tr>
+				{% endfor %}
+				<tr>
+					<td class="text-start fw-bold" colspan="3">
+						Total
+					</td>
+					<td class="text-center fw-bold" id="tot_protein_snack">{{ snack.tot_protein }} g</td>
+					<td class="text-center fw-bold" id="tot_carbohydrate_snack">{{ snack.tot_carbohydrate }} g</td>
+					<td class="text-center fw-bold" id="tot_fat_snack">{{ snack.tot_fat }} g</td>
+					<td class="text-end fw-bold" id="tot_calories_snack">{{ snack.tot_calories }} Kcal</td>
+				</tr>
+				<tr>
+					<td class="plans-newplan-row" colspan="7">
+						<form action="/search_new_entry_plan?plan_id={{ plan_id }}&meal=snack" id="add_snack"
+							method="post">
+							<a href="#" onclick="document.getElementById('add_snack').submit();">Add a snack</a>
+						</form>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div class="divider-small"></div>
+
+	<div class="container-fluid my-5">
+		<div>
+			<h2 class="text-center mb-4">Your plan stats</h2>
+		</div>
+		<section>
+			<div class="row">
+				<div class="col-xl-6 col-md-12 mb-4">
+					<div class="card card wrap-box-shadow-600">
+						<div class="card-body">
+							<div class="d-flex justify-content-between p-md-1">
+								<div class="d-flex flex-row">
+									<div class="align-self-center">
+										<i class="fa-solid fa-fire text-danger fa-3x me-4"></i>
+									</div>
+									<div>
+										<h3>Total Calories</h3>
+									</div>
+								</div>
+								<div class="align-self-center">
+									<h2 class="h1 mb-0">{{ (breakfast.tot_calories + lunch.tot_calories +
+										dinner.tot_calories)|round|int }}Kcal</h2>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-xl-6 col-md-12 mb-4">
+					<div class="card card wrap-box-shadow-600">
+						<div class="card-body">
+							<div class="d-flex justify-content-between p-md-1">
+								<div class="d-flex flex-row">
+									<div class="align-self-center">
+										<i class="fa-solid fa-drumstick-bite text-secondary fa-3x me-4"></i>
+									</div>
+									<div>
+										<h3>Total Protein</h3>
+									</div>
+								</div>
+								<div class="align-self-center">
+									<h2 class="h1 mb-0">{{ (breakfast.tot_protein + lunch.tot_protein +
+										dinner.tot_protein)|round|int }}g</h2>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xl-6 col-md-12 mb-4">
+					<div class="card card wrap-box-shadow-600">
+						<div class="card-body">
+							<div class="d-flex justify-content-between p-md-1">
+								<div class="d-flex flex-row">
+									<div class="align-self-center">
+										<i class="fa-solid fa-bread-slice text-warning fa-3x me-4"></i>
+									</div>
+									<div>
+										<h3>Total Carbohydrate</h3>
+									</div>
+								</div>
+								<div class="align-self-center">
+									<h2 class="h1 mb-0">{{ (breakfast.tot_carbohydrate + lunch.tot_carbohydrate +
+										dinner.tot_carbohydrate)|round|int }}g</h2>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-xl-6 col-md-12 mb-4">
+					<div class="card card wrap-box-shadow-600">
+						<div class="card-body">
+							<div class="d-flex justify-content-between p-md-1">
+								<div class="d-flex flex-row">
+									<div class="align-self-center">
+										<i class="fa-solid fa-cheese text-info fa-3x me-4"></i>
+									</div>
+									<div>
+										<h3>Total Fat</h3>
+									</div>
+								</div>
+								<div class="align-self-center">
+									<h2 class="h1 mb-0">{{ (breakfast.tot_fat + lunch.tot_fat +
+										dinner.tot_fat)|round|int }}g</h2>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<div class="container my-5">
+		<div class=" row">
+			<div class="col-lg-6 col-md-12">
+				<div class="mx-auto chart-bar-macro" id="chart_calories"></div>
+			</div>
+			<div class="col-lg-6 col-md-12">
+				<div class="mx-auto chart-bar-macro" id="chart_protein"></div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-lg-6 col-md-12">
+				<div class="mx-auto chart-bar-macro" id="chart_carbs"></div>
+			</div>
+			<div class="col-lg-6 col-md-12">
+				<div class="mx-auto chart-bar-macro" id="chart_fat"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="divider-small"></div>
+
+	<div class="container mt-5">
+		<h2 class="text-center mb-5">Macro distribution for each meal:</h2>
+		<div class="row">
+			<div class="col-lg-6 col-md-12">
+				<div class="mx-auto chart-doughnut-macro" id="chart_doughnut_macro_breakfast"></div>
+			</div>
+			<div class="col-lg-6 col-md-12">
+				<div class="mx-auto chart-doughnut-macro" id="chart_doughnut_macro_lunch"></div>
+			</div>
+		</div>
+		<div class="row mt-4">
+			<div class="col-lg-6 col-md-12">
+				<div class="mx-auto chart-doughnut-macro" id="chart_doughnut_macro_dinner"></div>
+			</div>
+			<div class="col-lg-6 col-md-12">
+				<div class="mx-auto chart-doughnut-macro" id="chart_doughnut_macro_snack"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script src="/static/view_plan.js"></script>
+{% endblock %}

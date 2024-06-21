@@ -1,0 +1,85 @@
+{% extends "layout.html" %} {% block title %}home page{% endblock %} {% block
+main %}
+<div class="container wrap-box-shadow col-xxl-8 px-4">
+	<div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+		<div class="col-lg-6">
+			<img src="/static/MyPlans.gif" class="d-block mx-lg-auto img-fluid" alt="MyDiet - Meal Planner"
+				width="700" height="500" loading="lazy" />
+		</div>
+		<div class="col-lg-6">
+			<h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3">
+				Plan your meals
+			</h1>
+			<p class="lead">
+				Create personalized meal plans and track what nutrients you assume
+				on a daily basis. Each plan is divided in these four categories: breakfast, lunch,
+				dinner and snack for even better customization and tracking
+			</p>
+			<div class="d-grid gap-2 d-md-flex justify-content-md-center">
+				{% if session["user_id"] %}
+				<a class="btn btn-primary btn-rounded btn-lg px-4 me-md-2 w-25" href="/my_plans">Check it</a>
+				{% else %}
+				<a class="btn btn-info btn-rounded btn-lg px-4 me-md-2" href="/login">Log in</a>
+				<a class="btn btn-info btn-rounded btn-lg px-4 me-md-2" href="/register">Register</a>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="divider my-5"></div>
+
+<div class="container wrap-box-shadow  col-xxl-8 px-4">
+	<div class="row align-items-center g-5 py-5">
+		<div class="col-lg-6">
+			<img src="/static/MyRecipes.png" class="d-block mx-lg-auto img-fluid" alt="MyDiet - Recipe Planner"
+				width="700" height="500" loading="lazy" />
+		</div>
+		<div class="col-lg-6">
+			<h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3">
+				Create your own recipes
+			</h1>
+			<p class="lead">
+				Combine any sort of ingredients to create personalized recipes and integrate them in
+				your meal plans while keeping track of their macro nutrients
+			</p>
+			<div class="d-grid gap-2 d-md-flex justify-content-md-center">
+				{% if session["user_id"] %}
+				<a class="btn btn-primary btn-rounded btn-lg px-4 me-md-2 w-25" href="/my_recipes">Check it</a>
+				{% else %}
+				<a class="btn btn-info btn-rounded btn-lg px-4 me-md-2" href="/login">Log in</a>
+				<a class="btn btn-info btn-rounded btn-lg px-4 me-md-2" href="/register">Register</a>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="divider my-5"></div>
+
+<div class="container wrap-box-shadow  col-xxl-8 px-4">
+	<div class="row flex-lg-row-reverse align-items-center g-5 py-5">
+		<div class="col-lg-6">
+			<img src="/static/FreeSearch.gif" class="d-block mx-lg-auto img-fluid" alt="MyDiet - Food Database"
+				width="700" height="500" loading="lazy" />
+		</div>
+		<div class="col-lg-6">
+			<h1 class="display-5 fw-bold text-body-emphasis lh-1 mb-3">
+				Explore a complete database of food products and brands
+			</h1>
+			<p class="lead">
+				Don't know what to eat? Search any kind of food or brand. You can
+				now also inspect detailed nutrition labels of anything that picks your interest
+			</p>
+			<div class="d-grid gap-2 d-md-flex justify-content-md-center">
+				{% if session["user_id"] %}
+				<a class="btn btn-primary btn-rounded btn-lg px-4 me-md-2 w-25" href="/search_food">Check it</a>
+				{% else %}
+				<a class="btn btn-info btn-rounded btn-lg px-4 me-md-2" href="/login">Log in</a>
+				<a class="btn btn-info btn-rounded btn-lg px-4 me-md-2" href="/register">Register</a>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

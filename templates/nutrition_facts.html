@@ -1,0 +1,156 @@
+{% extends "layout.html" %} {% block title %}nutrition facts{% endblock %} {%
+block main %}
+<div class="container">
+	<div class="container mb-5 text-center">
+		{% if item.brand %}
+		<h1 class="fw-bold lh-1">{{ item.brand }}'s</h1>
+		<h2 class="fw-bold lh-1">{{ item.name }}</h2>
+		{% else %}
+		<h1 class="fw-bold lh-1">{{ item.name }}</h1>
+		{% endif %}
+	</div>
+	<div class="row justify-content-center flex-row-reverse gx-5">
+		<div class="col-xxl-4 col-lg-5 col-md-12 my-5">
+			{% if item.img_url %}
+			<img src="{{ item.img_url }}" class="d-block mx-auto img-fluid" alt="Bootstrap Themes" width="350"
+				height="350" loading="lazy" />
+			{% endif %}
+			<div class="mx-auto chart-doughnut-macro" id="chart_doughnut_macro"></div>
+		</div>
+		<div class="col-lg-1"></div>
+		<div class="col-auto">
+			<div class="nutrition-facts">
+				<header class="nutrition-facts-header">
+					<h1 class="nutrition-facts-title">Nutrition Facts</h1>
+					<table class="nutrition-facts-table">
+						<tbody>
+							<tr>
+								<td>Serving Size</td>
+								<td>{{ item.serving_description }}</td>
+							</tr>
+						</tbody>
+					</table>
+				</header>
+				<table class="nutrition-facts-table">
+					<thead>
+						<tr>
+							<th colspan="3" class="small-info">Amount Per Serving</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<th colspan="2">
+								<b>Calories</b>
+							</th>
+							<td>{{ item.calories }}Kcal</td>
+						</tr>
+						<tr class="thick-row">
+							<td colspan="3" class="small-info">
+								<b>Amount</b>
+							</td>
+						</tr>
+						<tr>
+							<th colspan="2">
+								<b>Total Fat</b>
+							</th>
+							<td>
+								<b id="fat_value">{{ item.fat }}g</b>
+							</td>
+						</tr>
+						<tr>
+							<td class="blank-cell"></td>
+							<th>Saturated Fat</th>
+							<td>{% if item.saturated_fat == "N/A" %}{{ item.saturated_fat }}{% else %}{{ item.saturated_fat }}g{% endif %}</td>
+						</tr>
+						<tr>
+							<td class="blank-cell"></td>
+							<th>Trans Fat</th>
+							<td>{% if item.trans_fat == "N/A" %}{{ item.trans_fat }}{% else %}{{ item.trans_fat }}g{% endif %}</td>
+						</tr>
+						<tr>
+							<td class="blank-cell"></td>
+							<th>Polyunsaturated Fat</th>
+							<td>{% if item.polyunsaturated_fat == "N/A" %}{{ item.polyunsaturated_fat }}{% else %}{{ item.polyunsaturated_fat }}g{% endif %}</td>
+						</tr>
+						<tr>
+							<td class="blank-cell"></td>
+							<th>Monounsaturated Fat</th>
+							<td>{% if item.monounsaturated_fat == "N/A" %}{{ item.monounsaturated_fat }}{% else %}{{ item.monounsaturated_fat }}g{% endif %}</td>
+						</tr>
+						<tr>
+							<th colspan="2">
+								<b>Cholesterol</b>
+							</th>
+							<td>
+								<b>{% if item.cholesterol == "N/A" %}{{ item.cholesterol }}{% else %}{{ item.cholesterol }}mg{% endif %}</b>
+							</td>
+						</tr>
+						<tr>
+							<th colspan="2">
+								<b>Sodium</b>
+							</th>
+							<td>
+								<b>{% if item.sodium == "N/A" %}{{ item.sodium }}{% else %}{{ item.sodium }}mg{% endif %}</b>
+							</td>
+						</tr>
+						<tr>
+							<th colspan="2">
+								<b>Total Carbohydrate</b>
+							</th>
+							<td>
+								<b id="carbohydrate_value">{{ item.carbohydrate }}g</b>
+							</td>
+						</tr>
+						<tr>
+							<td class="blank-cell"></td>
+							<th>Dietary Fiber</th>
+							<td>{% if item.fiber == "N/A" %}{{ item.fiber }}{% else %}{{ item.fiber }}g{% endif %}</td>
+						</tr>
+						<tr>
+							<td class="blank-cell"></td>
+							<th>Sugars</th>
+							<td>{% if item.sugar == "N/A" %}{{ item.sugar }}{% else %}{{ item.sugar }}g{% endif %}</td>
+						</tr>
+						<tr class="thick-end">
+							<th colspan="2">
+								<b>Protein</b>
+							</th>
+							<td><b id="protein_value">{{ item.protein }}g</b></td>
+						</tr>
+					</tbody>
+				</table>
+
+				<table class="nutrition-facts-table">
+					<tbody>
+						<tr>
+							<td>Vitamin D</td>
+							<td>{% if item.vitamin_d == "N/A" %}{{ item.vitamin_d }}{% else %}{{ item.vitamin_d }}mg{% endif %}</td>
+						</tr>
+						<tr>
+							<td>Calcium</td>
+							<td>{% if item.calcium == "N/A" %}{{ item.calcium }}{% else %}{{ item.calcium }}mg{% endif %}</td>
+						</tr>
+						<tr>
+							<td>Iron</td>
+							<td>{% if item.iron == "N/A" %}{{ item.iron }}{% else %}{{ item.iron }}mg{% endif %}</td>
+						</tr>
+						<tr>
+							<td>Potassium</td>
+							<td>{% if item.potassium == "N/A" %}{{ item.potassium }}{% else %}{{ item.potassium }}mg{% endif %}</td>
+						</tr>
+						<tr>
+							<td>Vitamin A</td>
+							<td>{% if item.vitamin_a == "N/A" %}{{ item.vitamin_a }}{% else %}{{ item.vitamin_a }}mg{% endif %}</td>
+						</tr>
+						<tr>
+							<td>Vitamin C</td>
+							<td>{% if item.vitamin_c == "N/A" %}{{ item.vitamin_c }}{% else %}{{ item.vitamin_c }}mg{% endif %}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="/static/nutritional_facts.js"></script>
+{% endblock %}
