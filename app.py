@@ -14,6 +14,7 @@ from helpers import (
     prepare_plan,
     QUERY_NO_RESULTS,
 )
+
 # Configure application
 app = Flask(__name__)
 
@@ -242,15 +243,17 @@ def update_plan():
 
     # The user could have requested to change the amount of a certain ingredient
     if "increase_amount" in request.form:
+        name = request.form.get("ingredient_name")
         simple_food = request.args.get("simple_food")
         id_food = request.form.get("increase_amount")
         meal = request.args.get("meal")
-        return increase_amount_ingredient_plan(meal, id_food, simple_food, plan_id)
+        return increase_amount_ingredient_plan(meal, id_food, simple_food, plan_id, name)
     if "decrease_amount" in request.form:
+        name = request.form.get("ingredient_name")
         simple_food = request.args.get("simple_food")
         id_food = request.form.get("decrease_amount")
         meal = request.args.get("meal")
-        return decrease_amount_ingredient_plan(meal, id_food, simple_food, plan_id)
+        return decrease_amount_ingredient_plan(meal, id_food, simple_food, plan_id, name)
 
     # Was the request to add an entry?
     if "add_new_entry" in request.form:
@@ -258,11 +261,19 @@ def update_plan():
         meal = request.args.get("meal")
         new_entry_id = request.args.get("new_entry_id")
         simple_food = request.args.get("simple_food")
+        query = request.args.get("query")
         try:
-            new_ingredient_amount = round(float(new_ingredient_amount), 3)
+            new_ingredient_amount = round(float(new_ingredient_amount), 2)
+            if new_ingredient_amount <= 0:
+                flash("Please enter a value greater than 0", "warning")
+                return redirect(
+                    f"/search_new_entry_plan?plan_id={plan_id}&meal={meal}&search_entry_plan={query}&simple_food={simple_food}"
+                )
         except ValueError:
             flash("Please enter a valid number as the amount", "warning")
-            return redirect(f"/search_new_entry_plan?plan_id={plan_id}&meal={meal}")
+            return redirect(
+                f"/search_new_entry_plan?plan_id={plan_id}&meal={meal}&search_entry_plan={query}&simple_food={simple_food}"
+            )
         return add_entry_plan(
             new_ingredient_amount, meal, new_entry_id, simple_food, plan_id
         )
@@ -317,7 +328,7 @@ def remove_entry_plan(entry_id, meal, simple_food, plan_id):
     return redirect(f"/view_plan?plan_id={plan_id}")
 
 
-def increase_amount_ingredient_plan(meal, id_food, simple_food, plan_id):
+def increase_amount_ingredient_plan(meal, id_food, simple_food, plan_id, name):
     """Increase the amount of an ingredient in the plan by 1"""
     id_selector = "id_recipe" if simple_food == "False" else "id_food"
     try:
@@ -334,10 +345,10 @@ def increase_amount_ingredient_plan(meal, id_food, simple_food, plan_id):
         try:
             db.execute(
                 "UPDATE plans_entries SET amount = ? WHERE id = ?",
-                round(old_amount[0]["amount"] + 1, 1),
+                round(old_amount[0]["amount"] + 1, 2),
                 old_amount[0]["id"],
             )
-            flash("Amount increased", "success")
+            flash(f"\'{name}\' amount in \'{meal}\' has been increased by one unit", "success")
             return redirect(f"/view_plan?plan_id={plan_id}")
         except Exception as e:
             flash(str(e), "danger")
@@ -347,7 +358,7 @@ def increase_amount_ingredient_plan(meal, id_food, simple_food, plan_id):
         return redirect(f"/view_plan?plan_id={plan_id}")
 
 
-def decrease_amount_ingredient_plan(meal, id_food, simple_food, plan_id):
+def decrease_amount_ingredient_plan(meal, id_food, simple_food, plan_id, name):
     """Decrease the amount of an ingredient in the plan by 1"""
     id_selector = "id_recipe" if simple_food == "False" else "id_food"
     try:
@@ -365,10 +376,10 @@ def decrease_amount_ingredient_plan(meal, id_food, simple_food, plan_id):
             try:
                 db.execute(
                     "UPDATE plans_entries SET amount = ? WHERE id = ?",
-                    round(old_amount[0]["amount"] - 1, 1),
+                    round(old_amount[0]["amount"] - 1, 2),
                     old_amount[0]["id"],
                 )
-                flash("Amount decreased", "success")
+                flash(f"\'{name}\' amount in \'{meal}\' has been decreased by one unit", "success")
                 return redirect(f"/view_plan?plan_id={plan_id}")
             except Exception as e:
                 flash(str(e), "danger")
@@ -424,7 +435,7 @@ def search_new_entry_plan():
     """Handle requests regarding the search_new_entry_plan.html page"""
     plan_id = request.args.get("plan_id")
     meal = request.args.get("meal")
-    
+
     # Check if the user requesting the view the plan is the owner
     user_id = db.execute("SELECT user_id FROM plans WHERE id = ?", plan_id)
     if not user_id:
@@ -435,9 +446,16 @@ def search_new_entry_plan():
         return redirect("/my_plans")
 
     # Was a search requested?
-    if "add_entry_plan_button" in request.form:
+    if "add_entry_plan_button" in request.form or "search_entry_plan" in request.args:
         # Check if query isn't empty
-        if not (query := request.form.get("add_entry_plan_input")):
+        if request.args.get("search_entry_plan"):
+            # Reload previous query search after bad input
+            query = request.args.get("search_entry_plan")
+            if request.args.get("simple_food") == "True":
+                return search_new_entry_plan_food(query, plan_id, meal)
+            else:
+                return search_new_entry_plan_recipes(query, plan_id, meal)
+        elif not (query := request.form.get("add_entry_plan_input")):
             flash("Please enter a search query", "warning")
             return render_template(
                 "search_new_entry_plan.html", plan_id=plan_id, meal=meal
@@ -455,12 +473,18 @@ def search_new_entry_plan():
 
 def search_new_entry_plan_food(query, plan_id, meal):
     """Display results if the request was for simple food"""
-    foods = fetch_foods_query(query)
+    foods = fetch_foods_query(name=query, n_results=results_to_show)
     # Has there been any error?
     if isinstance(foods, str):
         if foods == QUERY_NO_RESULTS:
             flash(foods, "warning")
-            return redirect(f"/add_entry_plan?plan_id={plan_id}&meal={meal}")
+            return render_template(
+                "search_new_entry_plan.html",
+                query=query,
+                plan_id=plan_id,
+                meal=meal,
+                radio_to_check=1,
+            )
         else:
             flash(foods, "danger")
             return redirect("/")
@@ -471,7 +495,7 @@ def search_new_entry_plan_food(query, plan_id, meal):
         )
         return render_template(
             "search_new_entry_plan.html",
-            food=query,
+            query=query,
             plan_id=plan_id,
             meal=meal,
             results=foods,
@@ -496,7 +520,7 @@ def search_new_entry_plan_recipes(query, plan_id, meal):
         flash("No recipes found for the selected query", "warning")
         return render_template(
             "search_new_entry_plan.html",
-            food=query,
+            query=query,
             plan_id=plan_id,
             meal=meal,
             radio_to_check=2,
@@ -535,7 +559,7 @@ def search_new_entry_plan_recipes(query, plan_id, meal):
     ]
     return render_template(
         "search_new_entry_plan.html",
-        food=query,
+        query=query,
         plan_id=plan_id,
         meal=meal,
         results=foods,
@@ -689,13 +713,16 @@ def view_recipe():
         recipe = session[f"recipe_id_{recipe_id}"]
 
     # The user could have requested to search for a new ingredient
-    if "new_ingredient_query" in request.form:
-        search_ingredient = request.form.get("new_ingredient_query")
-        if search_ingredient == "":
+    if "new_ingredient_query" in request.form or "new_ingredient_query" in request.args:
+        if "new_ingredient_query" in request.args:
+            query = request.args.get("new_ingredient_query")
+        else:
+            query = request.form.get("new_ingredient_query")
+        if query == "":
             flash("Please enter an ingredient to search", "warning")
             return redirect(f"/view_recipe?recipe_id={recipe_id}")
         # Expected return value is an array of Food objects
-        search_results = fetch_foods_query(search_ingredient, n_results=results_to_show)
+        search_results = fetch_foods_query(name=query, n_results=results_to_show)
 
         if isinstance(search_results, str):
             if search_results == QUERY_NO_RESULTS:
@@ -706,7 +733,7 @@ def view_recipe():
                 return redirect("/")
         else:
             flash(
-                f"Displaying the top {len(search_results)} results for query: {search_ingredient}",
+                f"Displaying the top {len(search_results)} results for query: {query}",
                 "primary",
             )
         return render_template(
@@ -716,6 +743,7 @@ def view_recipe():
             recipe_total_servings=recipe_total_servings,
             recipe=recipe,
             search_results=search_results,
+            query=query,
         )
 
     # If no search query then simply display the list of current ingredients
@@ -766,21 +794,30 @@ def update_recipe():
 
     # The user could have requested to change the amount of a certain ingredient
     if "increase_amount" in request.form:
+        name=request.form.get("ingredient_name")
         id_food = request.form.get("increase_amount")
-        return increase_amount_ingredient_recipe(id_food, recipe_id)
+        return increase_amount_ingredient_recipe(id_food, recipe_id, name)
     if "decrease_amount" in request.form:
+        name=request.form.get("ingredient_name")
         id_food = request.form.get("decrease_amount")
-        return decrease_amount_ingredient_recipe(id_food, recipe_id)
+        return decrease_amount_ingredient_recipe(id_food, recipe_id, name)
 
     # Was the request to add an ingredient?
     if "add_new_entry" in request.form:
         new_ingredient_amount = request.form.get("new_ingredient_amount")
         new_ingredient_id = request.args.get("new_ingredient_id")
         try:
-            new_ingredient_amount = round(float(new_ingredient_amount), 3)
+            new_ingredient_amount = round(float(new_ingredient_amount), 2)
+            if new_ingredient_amount <= 0:
+                flash("Please enter a value greater than 0", "warning")
+                return redirect(
+                    f"/view_recipe?recipe_id={recipe_id}&new_ingredient_query={request.args.get('query')}"
+                )
         except ValueError:
             flash("Please enter a valid number", "warning")
-            return redirect(f"/view_recipe?recipe_id={recipe_id}")
+            return redirect(
+                f"/view_recipe?recipe_id={recipe_id}&new_ingredient_query={request.args.get('query')}"
+            )
         return add_entry_recipe(new_ingredient_amount, new_ingredient_id, recipe_id)
 
 
@@ -818,7 +855,7 @@ def remove_entry_recipe(entry_id, recipe_id):
     return redirect(f"/view_recipe?recipe_id={recipe_id}")
 
 
-def increase_amount_ingredient_recipe(id_food, recipe_id):
+def increase_amount_ingredient_recipe(id_food, recipe_id, name):
     """Increase the amount of an ingredient in the selected recipe by 1"""
     try:
         old_amount = db.execute(
@@ -833,11 +870,12 @@ def increase_amount_ingredient_recipe(id_food, recipe_id):
         try:
             db.execute(
                 "UPDATE recipes_entries SET amount = ? WHERE id = ?",
-                round(old_amount[0]["amount"] + 1, 1),
+                round(old_amount[0]["amount"] + 1, 2),
                 old_amount[0]["id"],
             )
             if f"recipe_id_{recipe_id}" in session:
                 session.pop(f"recipe_id_{recipe_id}")
+            flash(f"Amount of {name} increased by one", "success")
             return redirect(f"/view_recipe?recipe_id={recipe_id}")
         except Exception as e:
             flash(str(e), "danger")
@@ -847,7 +885,7 @@ def increase_amount_ingredient_recipe(id_food, recipe_id):
         return redirect(f"/view_recipe?recipe_id={recipe_id}")
 
 
-def decrease_amount_ingredient_recipe(id_food, recipe_id):
+def decrease_amount_ingredient_recipe(id_food, recipe_id, name):
     """Decrease the amount of an ingredient in the selected recipe by 1"""
     try:
         old_amount = db.execute(
@@ -863,11 +901,12 @@ def decrease_amount_ingredient_recipe(id_food, recipe_id):
             try:
                 db.execute(
                     "UPDATE recipes_entries SET amount = ? WHERE id = ?",
-                    round(old_amount[0]["amount"] - 1, 1),
+                    round(old_amount[0]["amount"] - 1, 2),
                     old_amount[0]["id"],
                 )
                 if f"recipe_id_{recipe_id}" in session:
                     session.pop(f"recipe_id_{recipe_id}")
+                flash(f"Amount of {name} decreased by one", "success")
                 return redirect(f"/view_recipe?recipe_id={recipe_id}")
             except Exception as e:
                 flash(str(e), "danger")
@@ -910,6 +949,7 @@ def add_entry_recipe(new_ingredient_amount, new_ingredient_id, recipe_id):
     # Recipe in session is now outdated
     if f"recipe_id_{recipe_id}" in session:
         session.pop(f"recipe_id_{recipe_id}")
+    flash("New ingredient added to the recipe", "success")
     return redirect(f"/view_recipe?recipe_id={recipe_id}")
 
 

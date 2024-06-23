@@ -60,7 +60,8 @@ main %}
 							method="post">
 							<button class="btn btn-danger" name="remove_food" {% if entry.simple_food==True %}
 								value="{{ entry.food.food_id }}" {% else %} value="{{ entry.id }}" {% endif %}
-								type="submit" onclick="return confirm('Are you sure you want to delete this entry?');"
+								type="submit"
+								onclick="return confirm('Are you sure you want to remove \'{% if entry.simple_food==True %}{{ entry.food.name }}{% else %}{{ entry.name }}{% endif %}\' from breakfast?');"
 								title="Delete this entry">
 								<i class="fa-solid fa-trash-can"></i>
 						</form>
@@ -69,8 +70,8 @@ main %}
 					<td class="text-start">
 						<a href="/nutrition_facts?food_id={{ entry.food.food_id }}" target="_blank"
 							rel="noopener noreferrer">
-							{% if entry.food.brand != "" %} {{ entry.food.brand }} : {% endif
-							%} {{ entry.food.name }}
+							{% if entry.food.brand != "" %}{{ entry.food.brand }}: {% endif
+							%}{{ entry.food.name }}
 						</a>
 					</td>
 					<td>
@@ -83,6 +84,7 @@ main %}
 							<div class="col-auto mx-auto">
 								<form action="/update_plan?plan_id={{ plan_id }}&meal=breakfast&simple_food=True"
 									method="post">
+									<input type="hidden" name="ingredient_name" value="{{ entry.food.name }}">
 									<div class="btn-group">
 										<button class="btn btn-success" type="submit" name="increase_amount"
 											value="{{ entry.food.food_id }}"><i class="fa-solid fa-plus"></i>
@@ -112,8 +114,10 @@ main %}
 						</div>
 						<div class="row">
 							<div class="col-auto mx-auto">
-								<form action="/update_plan?plan_id={{ plan_id }}&meal=breakfast&simple_food=False"
+								<form
+									action="/update_plan?plan_id={{ plan_id }}&meal=breakfast&simple_food=False"
 									method="post">
+									<input type="hidden" name="ingredient_name" value="{{ entry.name }}">
 									<div class="btn-group">
 										<button class="btn btn-success" type="submit" name="increase_amount"
 											value="{{ entry.id }}"><i class="fa-solid fa-plus"></i>
@@ -175,7 +179,8 @@ main %}
 							method="post">
 							<button class="btn btn-danger" name="remove_food" {% if entry.simple_food==True %}
 								value="{{ entry.food.food_id }}" {% else %} value="{{ entry.id }}" {% endif %}
-								type="submit" onclick="return confirm('Are you sure you want to delete this entry?');">
+								type="submit"
+								onclick="return confirm('Are you sure you want to remove \'{% if entry.simple_food==True %}{{ entry.food.name }}{% else %}{{ entry.name }}{% endif %}\' from lunch?');">
 								<i class="fa-solid fa-trash-can"></i>
 						</form>
 					</td>
@@ -183,8 +188,8 @@ main %}
 					<td class="text-start">
 						<a href="/nutrition_facts?food_id={{ entry.food.food_id }}" target="_blank"
 							rel="noopener noreferrer">
-							{% if entry.food.brand != "" %} {{ entry.food.brand }} : {% endif
-							%} {{ entry.food.name }}
+							{% if entry.food.brand != "" %}{{ entry.food.brand }}: {% endif
+							%}{{ entry.food.name }}
 						</a>
 					</td>
 					<td class="text-center">
@@ -197,6 +202,7 @@ main %}
 							<div class="col-auto mx-auto">
 								<form action="/update_plan?plan_id={{ plan_id }}&meal=lunch&simple_food=True"
 									method="post">
+									<input type="hidden" name="ingredient_name" value="{{ entry.food.name }}">
 									<div class="btn-group">
 										<button class="btn btn-success" type="submit" name="increase_amount"
 											value="{{ entry.food.food_id }}"><i class="fa-solid fa-plus"></i>
@@ -228,6 +234,7 @@ main %}
 							<div class="col-auto mx-auto">
 								<form action="/update_plan?plan_id={{ plan_id }}&meal=lunch&simple_food=False"
 									method="post">
+									<input type="hidden" name="ingredient_name" value="{{ entry.name }}">
 									<div class="btn-group">
 										<button class="btn btn-success" type="submit" name="increase_amount"
 											value="{{ entry.id }}"><i class="fa-solid fa-plus"></i>
@@ -288,7 +295,8 @@ main %}
 							method="post">
 							<button class="btn btn-danger" name="remove_food" {% if entry.simple_food==True %}
 								value="{{ entry.food.food_id }}" {% else %} value="{{ entry.id }}" {% endif %}
-								type="submit" onclick="return confirm('Are you sure you want to delete this entry?');">
+								type="submit"
+								onclick="return confirm('Are you sure you want to remove \'{% if entry.simple_food==True %}{{ entry.food.name }}{% else %}{{ entry.name }}{% endif %}\' from dinner?');">
 								<i class="fa-solid fa-trash-can"></i>
 						</form>
 					</td>
@@ -296,8 +304,8 @@ main %}
 					<td class="text-start">
 						<a href="/nutrition_facts?food_id={{ entry.food.food_id }}" target="_blank"
 							rel="noopener noreferrer">
-							{% if entry.food.brand != "" %} {{ entry.food.brand }} : {% endif
-							%} {{ entry.food.name }}
+							{% if entry.food.brand != "" %}{{ entry.food.brand }}: {% endif
+							%}{{ entry.food.name }}
 						</a>
 					</td>
 					<td>
@@ -310,6 +318,7 @@ main %}
 							<div class="col-auto mx-auto">
 								<form action="/update_plan?plan_id={{ plan_id }}&meal=dinner&simple_food=True"
 									method="post">
+									<input type="hidden" name="ingredient_name" value="{{ entry.food.name }}">
 									<div class="btn-group">
 										<button class="btn btn-success" type="submit" name="increase_amount"
 											value="{{ entry.food.food_id }}"><i class="fa-solid fa-plus"></i>
@@ -341,6 +350,7 @@ main %}
 							<div class="col-auto mx-auto">
 								<form action="/update_plan?plan_id={{ plan_id }}&meal=dinner&simple_food=False"
 									method="post">
+									<input type="hidden" name="ingredient_name" value="{{ entry.name }}">
 									<div class="btn-group">
 										<button class="btn btn-success" type="submit" name="increase_amount"
 											value="{{ entry.id }}"><i class="fa-solid fa-plus"></i>
@@ -400,7 +410,8 @@ main %}
 							method="post">
 							<button class="btn btn-danger" name="remove_food" {% if entry.simple_food==True %}
 								value="{{ entry.food.food_id }}" {% else %} value="{{ entry.id }}" {% endif %}
-								type="submit" onclick="return confirm('Are you sure you want to delete this entry?');">
+								type="submit"
+								onclick="return confirm('Are you sure you want to remove \'{% if entry.simple_food==True %}{{ entry.food.name }}{% else %}{{ entry.name }}{% endif %}\' from snack?');">
 								<i class="fa-solid fa-trash-can"></i>
 						</form>
 					</td>
@@ -408,8 +419,8 @@ main %}
 					<td class="text-start">
 						<a href="/nutrition_facts?food_id={{ entry.food.food_id }}" target="_blank"
 							rel="noopener noreferrer">
-							{% if entry.food.brand != "" %} {{ entry.food.brand }} : {% endif
-							%} {{ entry.food.name }}
+							{% if entry.food.brand != "" %}{{ entry.food.brand }}: {% endif
+							%}{{ entry.food.name }}
 						</a>
 					</td>
 					<td>
@@ -422,6 +433,7 @@ main %}
 							<div class="col-auto mx-auto">
 								<form action="/update_plan?plan_id={{ plan_id }}&meal=snack&simple_food=True"
 									method="post">
+									<input type="hidden" name="ingredient_name" value="{{ entry.food.name }}">
 									<div class="btn-group">
 										<button class="btn btn-success" type="submit" name="increase_amount"
 											value="{{ entry.food.food_id }}"><i class="fa-solid fa-plus"></i>
@@ -453,6 +465,7 @@ main %}
 							<div class="col-auto mx-auto">
 								<form action="/update_plan?plan_id={{ plan_id }}&meal=snack&simple_food=False"
 									method="post">
+									<input type="hidden" name="ingredient_name" value="{{ entry.name }}">
 									<div class="btn-group">
 										<button class="btn btn-success" type="submit" name="increase_amount"
 											value="{{ entry.id }}"><i class="fa-solid fa-plus"></i>
@@ -497,7 +510,7 @@ main %}
 
 	<div class="container-fluid my-5">
 		<div>
-			<h2 class="text-center mb-4">Your plan stats</h2>
+			<h2 class="text-center mb-4">Your plan overview</h2>
 		</div>
 		<section>
 			<div class="row">
@@ -515,7 +528,7 @@ main %}
 								</div>
 								<div class="align-self-center">
 									<h2 class="h1 mb-0">{{ (breakfast.tot_calories + lunch.tot_calories +
-										dinner.tot_calories)|round|int }}Kcal</h2>
+										dinner.tot_calories + snack.tot_calories)|round|int }}Kcal</h2>
 								</div>
 							</div>
 						</div>
@@ -535,7 +548,7 @@ main %}
 								</div>
 								<div class="align-self-center">
 									<h2 class="h1 mb-0">{{ (breakfast.tot_protein + lunch.tot_protein +
-										dinner.tot_protein)|round|int }}g</h2>
+										dinner.tot_protein + snack.tot_protein)|round|int }}g</h2>
 								</div>
 							</div>
 						</div>
@@ -557,7 +570,7 @@ main %}
 								</div>
 								<div class="align-self-center">
 									<h2 class="h1 mb-0">{{ (breakfast.tot_carbohydrate + lunch.tot_carbohydrate +
-										dinner.tot_carbohydrate)|round|int }}g</h2>
+										dinner.tot_carbohydrate + snack.tot_carbohydrate)|round|int }}g</h2>
 								</div>
 							</div>
 						</div>
@@ -577,7 +590,7 @@ main %}
 								</div>
 								<div class="align-self-center">
 									<h2 class="h1 mb-0">{{ (breakfast.tot_fat + lunch.tot_fat +
-										dinner.tot_fat)|round|int }}g</h2>
+										dinner.tot_fat + snack.tot_fat)|round|int }}g</h2>
 								</div>
 							</div>
 						</div>
@@ -609,7 +622,7 @@ main %}
 	<div class="divider-small"></div>
 
 	<div class="container mt-5">
-		<h2 class="text-center mb-5">Macro distribution for each meal:</h2>
+		<h2 class="text-center mb-5">Macro distribution for each meal</h2>
 		<div class="row">
 			<div class="col-lg-6 col-md-12">
 				<div class="mx-auto chart-doughnut-macro" id="chart_doughnut_macro_breakfast"></div>
