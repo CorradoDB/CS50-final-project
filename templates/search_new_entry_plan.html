@@ -11,8 +11,8 @@ main %}
 			<button class="btn btn-primary" name="add_entry_plan_button" value="add_entry_plan_button" type="submit">
 				Search
 			</button>
-			<input type="text" name="add_entry_plan_input" class="form-control" placeholder="taco" {% if food %}
-				value="{{ food }}" {% endif %} />
+			<input type="text" name="add_entry_plan_input" class="form-control" placeholder="taco" {% if query is defined and query %}
+				value="{{ query }}" {% endif %} />
 		</div>
 		<div class="text-center">
 			<div class="form-check form-check-inline">
@@ -30,7 +30,7 @@ main %}
 	</form>
 </div>
 
-{% if results != "" %}
+{% if results is defined and results %}
 <div class="divider"></div>
 
 <div class="container mt-4">
@@ -41,7 +41,7 @@ main %}
 		url_request = "simple_food=False" %} {% else %} {% set url_request =
 		"simple_food=True" %} {% endif %}
 		<form
-			action="/update_plan?plan_id={{ plan_id }}&meal={{ meal }}&new_entry_id={{ food['food_id'] }}&{{ url_request }}"
+			action="/update_plan?plan_id={{ plan_id }}&meal={{ meal }}&new_entry_id={{ food['food_id'] }}&{{ url_request }}&query={{ query }}"
 			method="post" id="add_food_{{ onclick_id_add }}">
 			<div class="row">
 				<div class="col-8 thin-right">
@@ -55,10 +55,12 @@ main %}
 						</a>
 					</div>
 					<div class="row">
-						Per {{ food.serving_description }}: calories {{ food.calories
-						}}Kcal, carbs {{food.carbohydrate }}g{% if food.sugar != "N/A"
-						%} ({{ food.sugar }}g sugar){% endif %}, protein {{ food.protein
-						}}g, fat {{ food.fat }}g
+						<div class="ml-3">
+							Per {{ food.serving_description }}: calories {{ food.calories
+							}}Kcal, carbs {{food.carbohydrate }}g{% if food.sugar is defined and food.sugar != "N/A"
+							%} ({{ food.sugar }}g sugar){% endif %}, protein {{ food.protein
+							}}g, fat {{ food.fat }}g
+						</div>
 					</div>
 				</div>
 				<div class="col-4 my-auto text-center">
@@ -66,7 +68,7 @@ main %}
 					<a href="#" onclick='document.getElementById("add_food_{{ onclick_id_add }}").submit();'>Amount of
 						"{{ food.measurement_description }}" to add:
 					</a>
-					<input type="text" autocomplete="off" name="new_ingredient_amount" placeholder="1" size="3" />
+					<input class="small-number-input" type="number" autocomplete="off" name="new_ingredient_amount" min="0.01" value="1"/>
 				</div>
 			</div>
 		</form>

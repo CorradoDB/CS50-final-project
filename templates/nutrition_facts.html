@@ -3,7 +3,7 @@ block main %}
 <div class="container">
 	<div class="container mb-5 text-center">
 		{% if item.brand %}
-		<h1 class="fw-bold lh-1">{{ item.brand }}'s</h1>
+		<h1 class="fw-bold lh-1">{{ item.brand }}</h1>
 		<h2 class="fw-bold lh-1">{{ item.name }}</h2>
 		{% else %}
 		<h1 class="fw-bold lh-1">{{ item.name }}</h1>
@@ -17,7 +17,6 @@ block main %}
 			{% endif %}
 			<div class="mx-auto chart-doughnut-macro" id="chart_doughnut_macro"></div>
 		</div>
-		<div class="col-lg-1"></div>
 		<div class="col-auto">
 			<div class="nutrition-facts">
 				<header class="nutrition-facts-header">

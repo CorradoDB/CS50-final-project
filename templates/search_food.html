@@ -39,10 +39,10 @@ main %}
 
 {% if query_result is defined %}
 <div class="container wrap-box-shadow">
-	<div class="row text-center justify-content-center mb-3">
+	<div class="row text-center mb-3">
 		{% for table in query_result %}
 		<div class="col-xl-4 col-lg-6 col-md-12">
-			<div class="card card-search-food mb-4 rounded-3 shadow-sm">
+			<div class="card card-search-food mb-4 rounded-3 shadow-sm  mx-auto">
 				<div class="card-header card-header-search-food">
 					<h4 class="my-0 fw-normal">
 						<b>{% if table.brand %}{{table.brand}}: {% endif %}</b>{{ table.name

@@ -11,7 +11,7 @@ window.onload = () => {
 
 	const chart = new CanvasJS.Chart("chart_doughnut_macro", {
 		title: {
-			text: "Main macros relative distribution",
+			text: "Main macro distribution",
 		},
 		legend: {
 			fontSize: 20,
